@@ -17,7 +17,13 @@ client = genai.Client(
 response = client.models.generate_content(
     model=config.MODEL,
     contents="Reply with exactly: pipeline ready",
-    config=types.GenerateContentConfig(max_output_tokens=64)
+    config=types.GenerateContentConfig(
+        max_output_tokens=128,
+        thinking_config=types.ThinkingConfig(thinking_budget=128)              # error handled -> Gemini 2.5 Pro doesn't allow disabling thinking at all.
+        # No reasoning is needed to echo a fixed string - budget=0 disables
+        # thinking for this call specifically. Without it, the model's own
+        # default thinking allocation can silently eat the entire token
+    )
 )
 
 candidate = response.candidates[0]
@@ -26,6 +32,8 @@ print("finish_reason:", candidate.finish_reason)
 for part in candidate.content.parts:
     if part.text:
         print("text", part.text)
+    else:
+        print("no content - finish_reason was", candidate.finish_reason)
 
 usage = response.usage_metadata
 thoughts = getattr(usage, "thoughts_token_count", None) or 0

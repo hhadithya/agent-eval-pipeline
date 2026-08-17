@@ -7,3 +7,4 @@ traces/*.jsonl
 !traces/.gitkeep
 docs/*.pdf
 *.pdf
+*.md
